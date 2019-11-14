@@ -2,14 +2,16 @@ import { QuillOptionsStatic } from 'quill';
 import { DeltaStatic } from 'quill-delta';
 import * as React from 'react';
 import { ActivityIndicator, View, ViewStyle, WebView as ReactNativeWebView } from 'react-native';
-import { WebView as CommunityWebView } from 'react-native-webview';
+import { WebView as CommunityWebView } from '@types/react-native-webview';
 import { WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
 import { providerRegistry } from '../../ProviderRegistry/index';
 import { EventType, IMessage } from './interfaces/IMessage';
 import { generateWebViewIndex } from './resources/generateWebViewIndex';
+import * as RNFS from 'react-native-fs';
 
 interface IProps {
   accessibilityLabel?: string;
+  editorStyle?: string;
   containerStyle?: ViewStyle;
   content?: DeltaStatic;
   onContentChange?: (content: DeltaStatic) => any;
@@ -73,7 +75,7 @@ export class Quill extends React.Component<IProps, IState> {
             ref={this.registerWebView}
             useWebKit={true}
             scalesPageToFit={false}
-            source={{ html: this.state.html }}
+            source={{ html: this.state.html, baseUrl: RNFS.DocumentDirectoryPath}}
             style={this.webViewStyle}
           />
         )}
@@ -94,9 +96,9 @@ export class Quill extends React.Component<IProps, IState> {
       ...defaultOptions,
       ...this.props.options,
     };
-
+    // console.log("生成的HTML是：：", generateWebViewIndex({ script, styleSheet }, this.props.content, options));
     this.setState({
-      html: generateWebViewIndex({ script, styleSheet }, this.props.content, options),
+      html: generateWebViewIndex({ script, styleSheet, editorStyle: this.props.editorStyle }, this.props.content, options),
     });
   }
 

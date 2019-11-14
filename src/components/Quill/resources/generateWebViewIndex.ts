@@ -14,11 +14,12 @@ export function generateWebViewIndex(
   content: DeltaStatic | undefined,
   options: QuillOptionsStatic
 ) {
-  return encodeURIComponent(/*html*/ `
+  return (/*html*/ `
     <!DOCTYPE html>
     <html>
       <head>
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
+        <title>Quill Page</title>
         <style>
           html,
           body {
@@ -75,6 +76,9 @@ export function generateWebViewIndex(
         <style>
           ${resources.styleSheet}
         </style>
+        <style>
+          ${resources.editorStyle}
+      </style>
       </head>
       <body>
         <div class="quill-wrapper">
@@ -140,7 +144,7 @@ export function generateWebViewIndex(
 
           /* Send a message when the text changes */
           editor.on('text-change', function() {
-            sendMessage(${EventType.CONTENT_CHANGE}, editor.getContents());
+            sendMessage(${EventType.CONTENT_CHANGE}, {currentDelta: editor.getContents(), fullPlainText: editor.getText(0), currentSelection: editor.getSelection()});
           });
 
           editor.root.addEventListener('focus', () => onFocus(editor));

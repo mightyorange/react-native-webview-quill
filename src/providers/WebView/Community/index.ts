@@ -1,2 +1,2 @@
-import { WebView } from 'react-native-webview';
+import { WebView } from '@types/react-native-webview';
 export { WebView };
