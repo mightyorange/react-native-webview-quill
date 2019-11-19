@@ -32,6 +32,7 @@ export function generateWebViewIndex(
             display: flex;
             flex-direction: column;
             height: 100%;
+            flex: 1
           }
 
           .quill-editor {
@@ -71,6 +72,9 @@ export function generateWebViewIndex(
             color: rgba(0,0,0,0.54);
             transition: all 0.2s;
           }
+          .cloudEditor {
+            display: none
+          }
         </style>
 
         <style>
@@ -84,7 +88,9 @@ export function generateWebViewIndex(
         <div class="quill-wrapper">
           <div class="quill-editor"></div>
         </div>
-
+        <div class="cloudEditor">
+          <div class="quill-editor"></div>
+        </div>
         <script>
           ${resources.script};
         </script>
@@ -105,19 +111,33 @@ export function generateWebViewIndex(
             editor.setContents(data);
           }
 
+          function openCloudEditor(data) {
+            let cloudEditorStyle = document.querySelector(".cloudEditor").style
+            if (data === true) {
+              document.body.style.display = 'flex';
+              document.body.style.flexDirection = 'row';
+              cloudEditorStyle.display="block";
+              cloudEditorStyle.flex = "1"
+            } else {
+              cloudEditorStyle.display="none"
+            }
+          }
+
           function processMessage(message) {
             const { type, data } = message;
-
             switch (type) {
               case ${EventType.CONTENT_CHANGE}:
                 return onContentChange(data);
+              case ${EventType.OPEN_CLOUD_EDITOR}:
+                return openCloudEditor(data)
             }
           }
 
           function onMessage(event) {
+            console.log("收到Message", event);
             try {
               // TODO: Implement only sending delta's to save time on JSON parsing overhead
-              processMessage(JSON.parse(event.data));
+              processMessage(event.data);
             } catch (error) {
               console.warn('Ignoring unprocessable event from React Native to Quill WebView due to error: ', error);
             }
@@ -125,7 +145,6 @@ export function generateWebViewIndex(
 
           function bindMessageHandler() {
             window.addEventListener('message', onMessage);
-            window.onmessage = onMessage
           }
 
           function onFocus(editor) {
@@ -137,7 +156,7 @@ export function generateWebViewIndex(
           }
 
           /* Create the Quill editor */
-          const editor = new Quill('.quill-editor', ${JSON.stringify(options)});
+          const editor = new Quill('.quill-wrapper .quill-editor', ${JSON.stringify(options)});
 
           /* Set the initial content */
           editor.setContents(${JSON.stringify(content)})

@@ -15,6 +15,7 @@ interface IProps {
   containerStyle?: ViewStyle;
   content?: DeltaStatic;
   onContentChange?: (content: DeltaStatic) => any;
+  openCloudEditor?: boolean;
   options?: QuillOptionsStatic;
 }
 
@@ -57,11 +58,15 @@ export class Quill extends React.Component<IProps, IState> {
     if (newProps.content !== this.props.content) {
       this.sendMessage(EventType.CONTENT_CHANGE, newProps.content);
     }
+    if (newProps.openCloudEditor !== this.props.openCloudEditor) {
+      this.sendMessage(EventType.OPEN_CLOUD_EDITOR, newProps.openCloudEditor);
+    }
 
     return (
       newState.html !== this.state.html || newProps.containerStyle != this.props.containerStyle
     );
   }
+
 
   public render() {
     return (
@@ -69,21 +74,21 @@ export class Quill extends React.Component<IProps, IState> {
         {this.state.html === null ? (
           <ActivityIndicator size="large" style={this.fullHeightStyle} />
         ) : (
-          <this.WebViewComponent
-            javaScriptEnabled={true}
-            onMessage={this.onMessage}
-            ref={this.registerWebView}
-            useWebKit={true}
-            scalesPageToFit={false}
-            source={{ html: this.state.html, baseUrl: RNFS.DocumentDirectoryPath}}
-            style={this.webViewStyle}
-          />
-        )}
+            <this.WebViewComponent
+              javaScriptEnabled={true}
+              onMessage={this.onMessage}
+              ref={this.registerWebView}
+              useWebKit={true}
+              scalesPageToFit={false}
+              source={{ html: this.state.html, baseUrl: RNFS.DocumentDirectoryPath }}
+              style={this.webViewStyle}
+            />
+          )}
       </View>
     );
   }
 
-  private registerWebView(webView: WebViewRef) {
+  private registerWebView = (webView: WebViewRef) => {
     this.webView = webView;
   }
 
@@ -102,9 +107,16 @@ export class Quill extends React.Component<IProps, IState> {
     });
   }
 
-  private sendMessage(type: EventType, data?: any) {
+  private sendMessage = (type: EventType, data?: any) => {
     if (this.webView) {
-      this.webView.postMessage(JSON.stringify({ type, data }));
+      this.webView.injectJavaScript(`(function() {
+        document.body.style.backgroundColor = "red"; 
+        window.postMessage(
+          ${JSON.stringify({ type, data })}, '*'
+          )})();
+      `
+      )
+      //this.webView.postMessage();
     }
   }
 
