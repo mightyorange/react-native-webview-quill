@@ -6,7 +6,12 @@ export class OnlineResourceProvider implements IResourceProvider {
   public async getQuillScript(): Promise<string> {
     return this.fetchResourceAsText(cdnProviderRegistry.endpoints.script);
   }
-
+  public async getHightlightJSScript(): Promise<string> {
+    return this.fetchResourceAsText(cdnProviderRegistry.endpoints.highlightjs);
+  }
+  public async getHighlightJSstyleSheet(): Promise<string> {
+   return this.fetchResourceAsText(cdnProviderRegistry.endpoints.highlightjsStyleSheet);
+  }
   public async getQuillStyleSheet(theme: QuillTheme): Promise<string> {
     switch (theme) {
       case QuillTheme.BUBBLE:

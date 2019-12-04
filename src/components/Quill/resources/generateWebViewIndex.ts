@@ -83,6 +83,9 @@ export function generateWebViewIndex(
         <style>
           ${resources.editorStyle}
       </style>
+      <style>
+      ${resources.hljsCSS}
+      </style>
       </head>
       <body>
         <div class="quill-wrapper">
@@ -91,6 +94,9 @@ export function generateWebViewIndex(
         <div class="cloudEditor">
           <div class="quill-editor"></div>
         </div>
+        <script>
+        ${resources.hljs};
+        </script>
         <script>
           ${resources.script};
         </script>

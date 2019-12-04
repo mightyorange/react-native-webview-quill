@@ -94,16 +94,23 @@ export class Quill extends React.Component<IProps, IState> {
 
   private async loadResources(): Promise<void> {
     const scriptRequest = this.ResourceProvider.getQuillScript();
+    const hightlightJSScriptRequest = this.ResourceProvider.getHightlightJSScript();
     const styleSheetRequest = this.ResourceProvider.getQuillStyleSheet(this.ThemeProvider);
+    const highlightJSstyleSheetRequest = this.ResourceProvider.getHighlightJSstyleSheet(this.ThemeProvider);
 
-    const [script, styleSheet] = await Promise.all([scriptRequest, styleSheetRequest]);
+    const [script, styleSheet, hljs, hljsCSS] = await Promise.all([scriptRequest, styleSheetRequest, hightlightJSScriptRequest, highlightJSstyleSheetRequest]);
     const options = {
       ...defaultOptions,
       ...this.props.options,
     };
+    const blotsScriptString = this.props.modules.blots.join(";"); //将每一个blots代码拼接起来
+    const formatsScriptString = this.props.modules.formats.join(";"); //将每一个formats代码拼接起来
+
+    let finalscript = script + ';' + blotsScriptString + ';' + formatsScriptString; //和主代码字串拼接起来
+
     // console.log("生成的HTML是：：", generateWebViewIndex({ script, styleSheet }, this.props.content, options));
     this.setState({
-      html: generateWebViewIndex({ script, styleSheet, editorStyle: this.props.editorStyle }, this.props.content, options),
+      html: generateWebViewIndex({ script: finalscript, styleSheet, editorStyle: this.props.editorStyle, hljs, hljsCSS  }, this.props.content, options),
     });
   }
 

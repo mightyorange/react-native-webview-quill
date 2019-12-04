@@ -13,4 +13,6 @@ export const cloudflare: ICdnEndpoints = {
   snowThemeStyleSheet: __DEV__
     ? 'https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.snow.css'
     : 'https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.snow.min.css',
+  highlightjs: 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.16.2/build/highlight.min.js',
+  highlightjsStyleSheet: 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.16.2/build/styles/default.min.css'
 };
