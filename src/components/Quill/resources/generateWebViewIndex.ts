@@ -112,7 +112,7 @@ export function generateWebViewIndex(
               window.postMessage(message);
             }
           }
-
+          
           function onContentChange(data) {
             editor.setContents(data);
           }

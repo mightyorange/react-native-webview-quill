@@ -15,8 +15,10 @@ interface IProps {
   containerStyle?: ViewStyle;
   content?: DeltaStatic;
   onContentChange?: (content: DeltaStatic) => any;
+  webviewRef?: ()=>any;
   openCloudEditor?: boolean;
   options?: QuillOptionsStatic;
+  injectedJavaScript?: string
 }
 
 interface IState {
@@ -82,6 +84,7 @@ export class Quill extends React.Component<IProps, IState> {
               scalesPageToFit={false}
               source={{ html: this.state.html, baseUrl: RNFS.DocumentDirectoryPath }}
               style={this.webViewStyle}
+              allowFileAccess={true}
             />
           )}
       </View>
@@ -90,6 +93,7 @@ export class Quill extends React.Component<IProps, IState> {
 
   private registerWebView = (webView: WebViewRef) => {
     this.webView = webView;
+    if(!!this.props.webviewRef) this.props.webviewRef(webView)
   }
 
   private async loadResources(): Promise<void> {
@@ -105,8 +109,8 @@ export class Quill extends React.Component<IProps, IState> {
     };
     const blotsScriptString = this.props.modules.blots.join(";"); //将每一个blots代码拼接起来
     const formatsScriptString = this.props.modules.formats.join(";"); //将每一个formats代码拼接起来
-
-    let finalscript = script + ';' + blotsScriptString + ';' + formatsScriptString; //和主代码字串拼接起来
+    const injectedScript = this.props.injectedJavaScript || '';
+    let finalscript = injectedScript + ';' + script + ';' + blotsScriptString + ';' + formatsScriptString; //和主代码字串拼接起来
 
     // console.log("生成的HTML是：：", generateWebViewIndex({ script, styleSheet }, this.props.content, options));
     this.setState({
@@ -133,6 +137,8 @@ export class Quill extends React.Component<IProps, IState> {
     switch (type) {
       case EventType.CONTENT_CHANGE:
         return this.props.onContentChange && this.props.onContentChange(data);
+      default:
+        return this.props.onMessage && this.props.onMessage(message);
     }
   }
 
