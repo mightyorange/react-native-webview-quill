@@ -27,8 +27,18 @@ export function generateWebViewIndex(
             margin: 0;
             padding: 0;
           }
+          .quill-wrapper {
+            /* height: calc(100% - 88px); */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+          }
           .ql-toolbar {
-            display: none
+            display: none;
+            order: 1;
+          }
+          .quill-editor {
+            overflow-y: auto;
           }
           .cloudEditor {
             display: none
@@ -132,9 +142,31 @@ export function generateWebViewIndex(
             sendMessage(${EventType.CONTENT_CHANGE}, {currentDelta: editor.getContents(), fullPlainText: editor.getText(0), currentSelection: editor.getSelection()});
           });
 
-          editor.root.addEventListener('focus', () => onFocus(editor));
-          editor.root.addEventListener('blur', () => onBlur(editor));
-
+          editor.root.addEventListener('focus', (e) => {
+            onFocus(editor)
+            });
+          let qlToolbar = document.querySelector('.ql-toolbar');
+          editor.root.addEventListener('blur', (e) => {
+            if (qlToolbar.contains(e.relatedTarget)) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            } else {
+              onBlur(editor);
+            }
+            
+            });
+        //键盘弹起后页面高度变小
+             const originHeight = document.documentElement.clientHeight || document.body.clientHeight;
+            window.addEventListener('resize', () => {
+              const resizeHeight = document.documentElement.clientHeight || document.body.clientHeight;
+              if (resizeHeight < originHeight) {
+                // 键盘弹起所后所需的页面逻辑
+                editor.root.focus()
+              } else {
+                // 键盘弹起所后所需的页面逻辑
+                editor.root.blur()
+              }
+            }, false); 
           bindMessageHandler();
         </script>
       </body>
