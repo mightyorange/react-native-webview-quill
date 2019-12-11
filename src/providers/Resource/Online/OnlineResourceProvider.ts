@@ -1,25 +1,42 @@
 import { QuillTheme } from '../../../components/Quill/interfaces/QuillTheme';
 import { IResourceProvider } from '../IResourceProvider';
 import { cdnProviderRegistry } from './CdnProviderRegistry/index';
+import quillScript from './endpoints/resources/quill.min.js.txt';
+import highlightjsStyleSheet from './endpoints/resources/default.min.css.txt';
+import highlightjs from './endpoints/resources/highlight.min.js.txt';
+import bubbleThemeStyleSheet from './endpoints/resources/quill.bubble.min.css.txt';
+import coreThemeStyleSheet from './endpoints/resources/quill.core.min.css.txt';
+import snowThemeStyleSheet from './endpoints/resources/quill.snow.min.css.txt';
+import loadLocalResource from 'react-native-local-resource'
+
 
 export class OnlineResourceProvider implements IResourceProvider {
   public async getQuillScript(): Promise<string> {
-    return this.fetchResourceAsText(cdnProviderRegistry.endpoints.script);
+    let data = await loadLocalResource(quillScript);
+    return data
   }
   public async getHightlightJSScript(): Promise<string> {
-    return this.fetchResourceAsText(cdnProviderRegistry.endpoints.highlightjs);
+    let data = await loadLocalResource(highlightjs);
+    return data
   }
   public async getHighlightJSstyleSheet(): Promise<string> {
-   return this.fetchResourceAsText(cdnProviderRegistry.endpoints.highlightjsStyleSheet);
+    let data = await loadLocalResource(highlightjsStyleSheet);
+    return data
   }
   public async getQuillStyleSheet(theme: QuillTheme): Promise<string> {
     switch (theme) {
-      case QuillTheme.BUBBLE:
-        return this.fetchResourceAsText(cdnProviderRegistry.endpoints.bubbleThemeStyleSheet);
-      case QuillTheme.SNOW:
-        return this.fetchResourceAsText(cdnProviderRegistry.endpoints.snowThemeStyleSheet);
-      default:
-        return this.fetchResourceAsText(cdnProviderRegistry.endpoints.coreThemeStyleSheet);
+      case QuillTheme.BUBBLE: {
+        let data = await loadLocalResource(bubbleThemeStyleSheet);
+        return data
+      }
+      case QuillTheme.SNOW: {
+        let data = await loadLocalResource(snowThemeStyleSheet);
+        return data
+      }
+      default: { 
+        let data = await loadLocalResource(coreThemeStyleSheet);
+        return data
+      }
     }
   }
 
