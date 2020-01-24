@@ -27,6 +27,7 @@ interface IState {
 
 const defaultOptions: QuillOptionsStatic = {
   theme: 'snow',
+  //scrollingContainer: '.quill-wrapper'
 };
 
 type WebViewRef = ReactNativeWebView | CommunityWebView | null;
@@ -84,7 +85,7 @@ export class Quill extends React.Component<IProps, IState> {
               scalesPageToFit={false}
               source={{ html: this.state.html, baseUrl: RNFS.DocumentDirectoryPath }}
               style={this.webViewStyle}
-              allowFileAccess={true}
+              allowFileAccess={true}              
             />
           )}
       </View>
