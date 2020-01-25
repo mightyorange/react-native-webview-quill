@@ -1,4 +1,3 @@
-import { QuillOptionsStatic } from 'quill';
 import { DeltaStatic } from 'quill-delta';
 import * as React from 'react';
 import { ActivityIndicator, View, ViewStyle, WebView as ReactNativeWebView } from 'react-native';
@@ -17,19 +16,13 @@ interface IProps {
   onContentChange?: (content: DeltaStatic) => any;
   webviewRef?: ()=>any;
   openCloudEditor?: boolean;
-  options?: QuillOptionsStatic;
+  options?: string;
   injectedJavaScript?: string
 }
 
 interface IState {
   html: string | null;
 }
-
-const defaultOptions: QuillOptionsStatic = {
-  theme: 'snow',
-  //scrollingContainer: '.quill-wrapper'
-};
-
 type WebViewRef = ReactNativeWebView | CommunityWebView | null;
 
 export class Quill extends React.Component<IProps, IState> {
@@ -104,10 +97,7 @@ export class Quill extends React.Component<IProps, IState> {
     const highlightJSstyleSheetRequest = this.ResourceProvider.getHighlightJSstyleSheet(this.ThemeProvider);
 
     const [script, styleSheet, hljs, hljsCSS] = await Promise.all([scriptRequest, styleSheetRequest, hightlightJSScriptRequest, highlightJSstyleSheetRequest]);
-    const options = {
-      ...defaultOptions,
-      ...this.props.options,
-    };
+    const options = this.props.options;
     const blotsScriptString = this.props.modules.blots.join(";"); //将每一个blots代码拼接起来
     const formatsScriptString = this.props.modules.formats.join(";"); //将每一个formats代码拼接起来
     const injectedScript = this.props.injectedJavaScript || '';

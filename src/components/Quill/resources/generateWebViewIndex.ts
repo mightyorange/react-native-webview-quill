@@ -1,4 +1,3 @@
-import { QuillOptionsStatic } from 'quill'
 import { DeltaStatic } from 'quill-delta'
 import { EventType } from '../interfaces/IMessage'
 import { IResources } from '../interfaces/IResources'
@@ -12,7 +11,7 @@ import { IResources } from '../interfaces/IResources'
 export function generateWebViewIndex (
   resources: IResources,
   content: DeltaStatic | undefined,
-  options: QuillOptionsStatic
+  options: string
 ) {
   return /*html*/ `
     <!DOCTYPE html>
@@ -35,8 +34,6 @@ export function generateWebViewIndex (
         <div id="progress">
         <span></span>
         </div>
-        <!--<h1 id="scrollPosition">hello</h1>-->
-        <button type='file' onClick="onSelectFile()">select</button>
         <div class="quill-wrapper">
           <div class="quill-editor"></div>
         </div>
@@ -51,8 +48,8 @@ export function generateWebViewIndex (
         </script>
 
         <script>
-          function onSelectFile (files) {
-            window.requestFilePicker();
+          function onSelectFile (filetype) {
+            window.requestFilePicker(filetype);
           }
           function sendMessage(type, data) {
             const message = JSON.stringify({ type, data });
@@ -125,7 +122,7 @@ export function generateWebViewIndex (
           }
           Quill.register('modules/toolbar', NewToolBar, true)
           /* Create the Quill editor */
-          const editor = new Quill('.quill-wrapper .quill-editor', ${JSON.stringify(options)});
+          const editor = new Quill('.quill-wrapper .quill-editor', ${options});
           /* Set the initial content */
           editor.setContents(${JSON.stringify(content)})
 
@@ -230,14 +227,14 @@ export function generateWebViewIndex (
                   return new Promise (resolve => {
                     let fileValue =  {
                       lastmodified: a.lastModified ? a.lastModified.toString() : '',
-                      name: a.name,
+                      name: a.name||'',
                       path: a.path,
-                      size: a.size,
-                      type: a.type,
+                      size: a.size||'',
+                      type: a.type||'',
                       randomtag: Math.random() // 将被作为文件名
                       .toString(36)
                       .substr(2),
-                      extension: a.name.split('.').pop(),
+                      extension: a.name ? a.name.split('.').pop() : '',
                       sourceobject: a // 有时需要读取原始file object，例如截图时不会传来文件path。
                     };
                     quill.insertEmbed(position, 'file', fileValue, 'user');
