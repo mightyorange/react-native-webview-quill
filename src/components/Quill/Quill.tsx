@@ -97,7 +97,7 @@ export class Quill extends React.Component<IProps, IState> {
     const highlightJSstyleSheetRequest = this.ResourceProvider.getHighlightJSstyleSheet(this.ThemeProvider);
 
     const [script, styleSheet, hljs, hljsCSS] = await Promise.all([scriptRequest, styleSheetRequest, hightlightJSScriptRequest, highlightJSstyleSheetRequest]);
-    const options = this.props.options;
+    const options = this.props.options || {};
     const blotsScriptString = this.props.modules.blots.join(";"); //将每一个blots代码拼接起来
     const formatsScriptString = this.props.modules.formats.join(";"); //将每一个formats代码拼接起来
     const injectedScript = this.props.injectedJavaScript || '';
@@ -105,7 +105,7 @@ export class Quill extends React.Component<IProps, IState> {
 
     // console.log("生成的HTML是：：", generateWebViewIndex({ script, styleSheet }, this.props.content, options));
     this.setState({
-      html: generateWebViewIndex({ script: finalscript, styleSheet, editorStyle: this.props.editorStyle, hljs, hljsCSS  }, this.props.content, options),
+      html: generateWebViewIndex({ script: finalscript, styleSheet, editorStyle: this.props.editorStyle, hljs, hljsCSS  }, this.props.content, JSON.stringify(options)),
     });
   }
 

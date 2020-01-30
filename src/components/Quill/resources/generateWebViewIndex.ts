@@ -122,7 +122,87 @@ export function generateWebViewIndex (
           }
           Quill.register('modules/toolbar', NewToolBar, true)
           /* Create the Quill editor */
-          const editor = new Quill('.quill-wrapper .quill-editor', ${options});
+          const editor = new Quill('.quill-wrapper .quill-editor', 
+          {
+            ...{
+              theme: 'snow',
+              debug: 'info',
+              modules: {
+                toolbar: {
+                  handlers: {
+                    // handlers object will be merged with default handlers object
+                    /* link: function(value) {
+                      console.log("thishahaha", value);
+                    } */
+                    /* "markpen": (value) => {
+                      this.quillRef.format('markpen', true);
+                    } */
+                    image: function () {
+                      window.onSelectFile('image')
+                    },
+                    link: function () {
+                      window.onSelectFile('file')
+                    }
+                  },
+                  container: [
+                    ['bold', 'italic', 'underline', 'strike'], // toggled buttons
+                    ['blockquote', 'code-block'],
+
+                    [{ header: 1 }, { header: 2 }, { header: 3 }], // custom button values
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    // [{ 'script': 'sub'}, { 'script': 'super' }],      //superscript/subscript
+                    [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+                    // [{ 'direction': 'rtl' }],                         //text direction
+
+                    // [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+                    // [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+                    [{ color: [] }], // dropdown with defaults from theme
+                    [{ font: [] }],
+                    // [{ 'align': [] }],
+
+                    // ['markpen'],
+                    ['image', 'link'] // remove formatting button
+                  ]
+                },
+                // imageImport: true,
+
+                /*     imageResize: {
+                  displaySize: true
+                }, */
+                syntax: true,
+                /*     focus: {
+                  focusClass: "focused-blot" // Defaults to .focused-blot.
+                } */
+                clipboard: {
+                  matchers: []
+                }
+              },
+              placeholder: 'Compose an epic...',
+              readOnly: false,
+              formats: [
+                'header',
+                'bold',
+                'italic',
+                'underline',
+                'strike',
+                'blockquote',
+                'list',
+                'bullet',
+                'indent',
+                'link',
+                'image',
+                'color',
+                'font',
+                'code',
+                'size',
+                'code-block',
+                'file',
+                'markpen',
+                'HorizontalRule'
+              ]
+            }, ...${options}}
+          );
           /* Set the initial content */
           editor.setContents(${JSON.stringify(content)})
 
