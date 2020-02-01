@@ -110,7 +110,7 @@ export function generateWebViewIndex(
           setTimeout(()=>{editor.selection.scrollIntoView(editor.scrollingContainer)}, 100);
         }
         window.keyboardExpand = function (newHeight) {
-          if (newHeight )document.body.style.height = newHeight;
+          if (newHeight) document.body.style.height = newHeight;
           editor.container.classList.remove('quill-focus');
           document.querySelector(".ql-toolbar").style.display = 'none';
           setTimeout(()=>{editor.selection.scrollIntoView(editor.scrollingContainer)}, 100);
@@ -297,6 +297,8 @@ export function generateWebViewIndex(
                 position + fileValues.length,
                 'user',
               );
+              // 成功插入文件后，缩回键盘，这是因为，如果用户选好文件回来后，webview的editor会自动blur，程序性加上focus似乎也无效。
+              window.keyboardExpand("100%");
             })
           };
         bindMessageHandler();
