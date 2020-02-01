@@ -14,10 +14,10 @@ interface IProps {
   containerStyle?: ViewStyle;
   content?: DeltaStatic;
   onContentChange?: (content: DeltaStatic) => any;
-  webviewRef?: ()=>any;
+  webviewRef?: () => any;
   openCloudEditor?: boolean;
   options?: string;
-  injectedJavaScript?: string
+  injectedJavaScript?: string;
 }
 
 interface IState {
@@ -63,49 +63,63 @@ export class Quill extends React.Component<IProps, IState> {
     );
   }
 
-
   public render() {
     return (
       <View accessibilityLabel={this.props.accessibilityLabel} style={this.props.containerStyle}>
         {this.state.html === null ? (
           <ActivityIndicator size="large" style={this.fullHeightStyle} />
         ) : (
-            <this.WebViewComponent
-              javaScriptEnabled={true}
-              onMessage={this.onMessage}
-              ref={this.registerWebView}
-              useWebKit={true}
-              scalesPageToFit={false}
-              source={{ html: this.state.html, baseUrl: RNFS.DocumentDirectoryPath }}
-              style={this.webViewStyle}
-              allowFileAccess={true}              
-            />
-          )}
+          <this.WebViewComponent
+            javaScriptEnabled={true}
+            onMessage={this.onMessage}
+            ref={this.registerWebView}
+            useWebKit={true}
+            scalesPageToFit={false}
+            source={{ html: this.state.html, baseUrl: RNFS.DocumentDirectoryPath }}
+            style={this.webViewStyle}
+            allowFileAccess={true}
+            originWhitelist={['file://']}
+            bounces={false}
+            scrollEnabled={false}
+          />
+        )}
       </View>
     );
   }
 
   private registerWebView = (webView: WebViewRef) => {
     this.webView = webView;
-    if(!!this.props.webviewRef) this.props.webviewRef(webView)
-  }
+    if (!!this.props.webviewRef) this.props.webviewRef(webView);
+  };
 
   private async loadResources(): Promise<void> {
     const scriptRequest = this.ResourceProvider.getQuillScript();
     const hightlightJSScriptRequest = this.ResourceProvider.getHightlightJSScript();
     const styleSheetRequest = this.ResourceProvider.getQuillStyleSheet(this.ThemeProvider);
-    const highlightJSstyleSheetRequest = this.ResourceProvider.getHighlightJSstyleSheet(this.ThemeProvider);
+    const highlightJSstyleSheetRequest = this.ResourceProvider.getHighlightJSstyleSheet(
+      this.ThemeProvider
+    );
 
-    const [script, styleSheet, hljs, hljsCSS] = await Promise.all([scriptRequest, styleSheetRequest, hightlightJSScriptRequest, highlightJSstyleSheetRequest]);
+    const [script, styleSheet, hljs, hljsCSS] = await Promise.all([
+      scriptRequest,
+      styleSheetRequest,
+      hightlightJSScriptRequest,
+      highlightJSstyleSheetRequest,
+    ]);
     const options = this.props.options || {};
-    const blotsScriptString = this.props.modules.blots.join(";"); //将每一个blots代码拼接起来
-    const formatsScriptString = this.props.modules.formats.join(";"); //将每一个formats代码拼接起来
+    const blotsScriptString = this.props.modules.blots.join(';'); //将每一个blots代码拼接起来
+    const formatsScriptString = this.props.modules.formats.join(';'); //将每一个formats代码拼接起来
     const injectedScript = this.props.injectedJavaScript || '';
-    let finalscript = injectedScript + ';' + script + ';' + blotsScriptString + ';' + formatsScriptString; //和主代码字串拼接起来
+    let finalscript =
+      injectedScript + ';' + script + ';' + blotsScriptString + ';' + formatsScriptString; //和主代码字串拼接起来
 
     // console.log("生成的HTML是：：", generateWebViewIndex({ script, styleSheet }, this.props.content, options));
     this.setState({
-      html: generateWebViewIndex({ script: finalscript, styleSheet, editorStyle: this.props.editorStyle, hljs, hljsCSS  }, this.props.content, JSON.stringify(options)),
+      html: generateWebViewIndex(
+        { script: finalscript, styleSheet, editorStyle: this.props.editorStyle, hljs, hljsCSS },
+        this.props.content,
+        JSON.stringify(options)
+      ),
     });
   }
 
@@ -116,11 +130,10 @@ export class Quill extends React.Component<IProps, IState> {
         window.postMessage(
           ${JSON.stringify({ type, data })}, '*'
           )})();
-      `
-      )
+      `);
       //this.webView.postMessage();
     }
-  }
+  };
 
   private processMessage(message: IMessage) {
     const { type, data } = message;
