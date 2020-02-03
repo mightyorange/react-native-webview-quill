@@ -75,12 +75,13 @@ export class Quill extends React.Component<IProps, IState> {
             ref={this.registerWebView}
             useWebKit={true}
             scalesPageToFit={false}
-            source={{ html: this.state.html, baseUrl: RNFS.DocumentDirectoryPath }}
+            source={{ html: this.state.html, baseUrl: `file:////${RNFS.DocumentDirectoryPath}` }}
             style={this.webViewStyle}
             allowFileAccess={true}
-            originWhitelist={['file://']}
+            originWhitelist={['*']}
             bounces={false}
             scrollEnabled={false}
+            allowingReadAccessToURL={`file:////${RNFS.DocumentDirectoryPath}`}
           />
         )}
       </View>
