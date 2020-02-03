@@ -48,6 +48,57 @@ export function generateWebViewIndex(
         </script>
 
         <script>
+        var Clipboard = Quill.import('modules/clipboard');
+        class PlainClipboard extends Clipboard {
+            constructor(quill, options) {
+                super(quill, options);
+                quill.root.addEventListener('drop', e => {
+                    e.preventDefault();
+                    let native;
+                    if (document.caretRangeFromPoint) {
+                      native = document.caretRangeFromPoint(e.clientX, e.clientY);
+                    } else if (document.caretPositionFromPoint) {
+                      const position = document.caretPositionFromPoint(e.clientX, e.clientY);
+                      native = document.createRange();
+                      native.setStart(position.offsetNode, position.offset);
+                      native.setEnd(position.offsetNode, position.offset);
+                    } else {
+                      return;
+                    }
+                    const normalized = quill.selection.normalizeNative(native);
+                    const range = quill.selection.normalizedToRange(normalized);
+                    window.fileBlotInsert(e.dataTransfer.files,range, quill);
+                  });
+            }
+            onPaste(e) {
+                // 从其他地方复制一个文件，然后在本程序粘贴
+                debugger;
+                if (e.defaultPrevented || !this.quill.isEnabled()) return;
+                const html = e.clipboardData.getData('text/html');
+                const files = Array.from(e.clipboardData.files || []);
+
+                if (!html && files.length > 0) {
+                    let filesArray = files.map(file=>{
+                      return new Promise((resolve, reject)=>{
+                        let fr = new FileReader();
+                        fr.onload=function(){
+                          file.dataURL = this.result.split(',')[1];
+                          resolve(file)
+                        }
+                        fr.readAsDataURL(file);
+                      })
+                    });
+                    Promise.all(filesArray).then(files=>window.fileBlotInsert(files, null, this.quill))
+                    e.preventDefault();
+                    e.stopImmediatePropagation(); 
+                    e.stopPropagation(); 
+                } else {
+                  super.onPaste(e);
+                }
+              }
+        }
+        Quill.register('modules/clipboard', PlainClipboard, true);
+
         function onSelectFile (filetype) {
           window.requestFilePicker(filetype);
         }
