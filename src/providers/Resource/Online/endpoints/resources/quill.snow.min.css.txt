@@ -38,6 +38,7 @@ body {
   overflow-x: scroll;
   white-space: nowrap;
   overflow-y: auto;
+  border-width:0 !important;
 }
 .ql-toolbar.ql-snow .ql-picker-options {
   top: auto !important;
