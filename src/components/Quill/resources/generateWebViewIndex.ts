@@ -293,11 +293,14 @@ export function generateWebViewIndex(
           scrollContainer.addEventListener('scroll', (e) => {
           last_known_scroll_position = scrollContainer.scrollHeight;
           if (!ticking) {
-          if (scrollContainer.scrollTop > last_known_scroll_top) {
+          if (scrollContainer.scrollTop > last_known_scroll_top && scrollContainer.scrollTop > 0) {
             // 向下
+            console.log("down", scrollContainer.scrollTop, last_known_scroll_top);
             window.reportScroll('down')
           } else {
+            // ios拉到最开始会有弹跳效果，scrollContainer.scrollTop会等于0甚至小于零，所以这种情况一律显示按钮。
             // 向上
+            console.log("up", scrollContainer.scrollTop, last_known_scroll_top);
             window.reportScroll('up') 
           };
           last_known_scroll_top = scrollContainer.scrollTop;
