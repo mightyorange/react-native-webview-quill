@@ -19,6 +19,9 @@ body {
   flex-direction: column;
   box-sizing: border-box;
 }
+.ql-container.ql-snow{
+  border:0px solid #ccc;
+}
 .quill-wrapper {
   min-height: 0;
   flex: 1;
