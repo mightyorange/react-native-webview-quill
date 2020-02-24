@@ -1,6 +1,6 @@
-import { DeltaStatic } from 'quill-delta';
-import { EventType } from '../interfaces/IMessage';
-import { IResources } from '../interfaces/IResources';
+import { DeltaStatic } from 'quill-delta'
+import { EventType } from '../interfaces/IMessage'
+import { IResources } from '../interfaces/IResources'
 
 /* This file contains HTML for the webview that contains Quill. You can use the es6-string-html, es6-string-css and 
    es6-string-javascript plugins for VSCode to get syntax highlighting on this file.
@@ -8,7 +8,7 @@ import { IResources } from '../interfaces/IResources';
    We input all EventType.{...} occurrences as variables in the template strings to enable type analysis for the event
    types, since they might be change sensitive. */
 
-export function generateWebViewIndex(
+export function generateWebViewIndex (
   resources: IResources,
   content: DeltaStatic | undefined,
   options: string
@@ -49,6 +49,7 @@ export function generateWebViewIndex(
 
         <script>
         var Clipboard = Quill.import('modules/clipboard');
+        var Delta = Quill.import('delta');
         class PlainClipboard extends Clipboard {
             constructor(quill, options) {
                 super(quill, options);
@@ -231,10 +232,48 @@ export function generateWebViewIndex(
                 focusClass: "focused-blot" // Defaults to .focused-blot.
               } */
               clipboard: {
-                matchers: []
+                matchers: [
+                  [1, function (node, delta) {
+                    let backgroundImgInCss = getComputedStyle(node).backgroundImage;
+                    let dirtyImgSrc = backgroundImgInCss.match(/\\((.*?)\\)/); /* 注意，这里相比桌面端增加了转义符 */
+                    if (dirtyImgSrc) {
+                      console.log("返回0", node, delta,dirtyImgSrc, !!dirtyImgSrc, !!backgroundImgInCss, typeof backgroundImgInCss );
+                      // 如果是一个普通元素，用backgroundImage来展示图片
+                      // 要将quill原生处理过的delta，接上这里制作的file blot delta（因为可能会有一些其他内容）
+                      // 如果是一个img标签
+                      let imgSrc = dirtyImgSrc[1].replace(/('|")/g,'');
+                      let fileValue = {
+                        randomtag: Math.random() // 将被作为文件名
+                        .toString(36)
+                        .substr(2),
+                        path: imgSrc,
+                        type: 'image/*'
+                      }
+                      let newdelta = new Delta().insert({file:fileValue});
+                      return delta.compose(newdelta);
+                    } else if (node.nodeName.toLowerCase() == 'img') {
+                      // 如果是一个img标签
+                      let fileValue = {
+                        randomtag: Math.random() // 将被作为文件名
+                        .toString(36)
+                        .substr(2),
+                        path: node.src,
+                        type: 'image/*'
+                      }
+                      let newdelta = new Delta().insert({file:fileValue});
+                      return newdelta;
+                    } else {
+                      // 否则就将原始delta返回出来
+                      return delta
+                    }
+                  }],
+                  ['ins', function (node, delta) {diffMarkNodePaste(node, delta)}],
+                  ['del', function (node, delta) {diffMarkNodePaste(node, delta)}],
+                  ['article', function (node, delta) {fileBlotPaste(node, delta)}]
+                ]
               }
             },
-            placeholder: 'Compose an epic...',
+            placeholder: 'mttd开始写点什么吧...',
             readOnly: false,
             formats: [
               'header',
@@ -259,8 +298,61 @@ export function generateWebViewIndex(
             ]
           }, ...${options}}
         );
+
+        // 粘贴的处理
+        function diffMarkNodePaste (node, delta) {
+          if (node.className == "diffMark") {
+            let allFileBlotNode = Array.from(node.querySelectorAll('.fileBlot'));
+            if (node.childNodes.length === 1 && node.childNodes[0].className == 'fileBlot') {
+              // 證明這是一個fileBlot的diffMark
+              let a = node.childNodes[0].dataset;
+              let fileValue = {
+                lastmodified: a.lastmodified,
+                name: a.name,
+                path: a.path, // 文件来源地址
+                size: a.size,
+                type: a.type,
+                randomtag: a.randomtag,
+                extension: a.extension,
+                documentpath: a.documentpath // 在app文档目录下的相对地址，应该被存进ops
+              };
+              let newdelta = new Delta().insert({ file: fileValue });
+              return newdelta;
+            } else {
+              // 證明這是一個文本diffMark
+              // 需要去掉diff顔色
+              // 需要保證粘貼到的内容是diffMark裏面的内容（因爲diffMark的顔色是寫在diffMark元素上的）
+              return delta
+            }
+          }
+        }
+
+        function fileBlotPaste (node, delta) {
+          // 处理从其他笔记中拷贝fileBlot
+          if (node.className='fileBlot') {
+            let a = node.dataset;
+            let fileValue = {
+              lastmodified: a.lastmodified,
+              name: a.name,
+              path: path.join(window.userDataPath, a.documentpath) , // 文件来源地址，要绝对化
+              size: a.size,
+              type: a.type,
+              randomtag: Math.random() // assign一个新的randomtag作为文件名
+              .toString(36)
+              .substr(2),
+              extension: a.extension,
+              // documentpath: a.documentpath  在app文档目录下的相对地址，必须删掉！
+            };
+            let newdelta = new Delta().insert({ file: fileValue });
+            return newdelta;
+          }
+        };
+        // 结束
+
+
+
         /* Set the initial content */
-        editor.setContents(${JSON.stringify(content)})
+        editor.setContents(${JSON.stringify(content)});
       
         /* Send a message when the text changes */
         // Focus ===> Size
@@ -362,5 +454,5 @@ export function generateWebViewIndex(
         </script>
       </body>
     </html>
-  `;
+  `
 }
