@@ -334,7 +334,7 @@ export function generateWebViewIndex (
             let fileValue = {
               lastmodified: a.lastmodified,
               name: a.name,
-              path: path.join(window.userDataPath, a.documentpath) , // 文件来源地址，要绝对化
+              path: path.join(DocumentDirectoryPath, a.documentpath) , // 文件来源地址，要绝对化
               size: a.size,
               type: a.type,
               randomtag: Math.random() // assign一个新的randomtag作为文件名
