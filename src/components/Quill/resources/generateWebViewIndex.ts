@@ -129,7 +129,11 @@ export function generateWebViewIndex (
             cloudEditorStyle.display="none"
           }
         }
-      
+
+        function setEnable (data) {
+          editor.enable(!data)
+        }
+        
         function processMessage(message) {
           const { type, data } = message;
           switch (type) {
@@ -137,6 +141,8 @@ export function generateWebViewIndex (
               return onContentChange(data);
             case ${EventType.OPEN_CLOUD_EDITOR}:
               return openCloudEditor(data)
+            case ${EventType.UPDATE_READONLY}:
+              return setEnable(data)
           }
         }
       

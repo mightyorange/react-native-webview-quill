@@ -57,7 +57,9 @@ export class Quill extends React.Component<IProps, IState> {
     if (newProps.openCloudEditor !== this.props.openCloudEditor) {
       this.sendMessage(EventType.OPEN_CLOUD_EDITOR, newProps.openCloudEditor);
     }
-
+    if (newProps.options.readOnly !== this.props.options.readOnly) {
+      this.sendMessage(EventType.UPDATE_READONLY, newProps.options.readOnly);
+    }
     return (
       newState.html !== this.state.html || newProps.containerStyle != this.props.containerStyle
     );
@@ -127,7 +129,6 @@ export class Quill extends React.Component<IProps, IState> {
   private sendMessage = (type: EventType, data?: any) => {
     if (this.webView) {
       this.webView.injectJavaScript(`(function() {
-        document.body.style.backgroundColor = "red"; 
         window.postMessage(
           ${JSON.stringify({ type, data })}, '*'
           )})();
