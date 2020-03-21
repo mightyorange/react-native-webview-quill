@@ -43,11 +43,12 @@ export class Quill extends React.Component<IProps, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      html: null,
+      htmlReady:false
     };
 
     this.onMessage = this.onMessage.bind(this);
-    this.loadResources();
+        this.loadResources();
+
   }
 
   public shouldComponentUpdate(newProps: IProps, newState: IState) {
@@ -61,14 +62,14 @@ export class Quill extends React.Component<IProps, IState> {
       this.sendMessage(EventType.UPDATE_READONLY, newProps.options.readOnly);
     }
     return (
-      newState.html !== this.state.html || newProps.containerStyle != this.props.containerStyle
+      newState.htmlReady !== this.state.htmlReady || newProps.containerStyle != this.props.containerStyle
     );
   }
 
   public render() {
     return (
       <View accessibilityLabel={this.props.accessibilityLabel} style={this.props.containerStyle}>
-        {this.state.html === null ? (
+        {this.state.htmlReady === false ? (
           <ActivityIndicator size="large" style={this.fullHeightStyle} />
         ) : (
           <this.WebViewComponent
@@ -77,7 +78,7 @@ export class Quill extends React.Component<IProps, IState> {
             ref={this.registerWebView}
             useWebKit={true}
             scalesPageToFit={false}
-            source={{ html: this.state.html, baseUrl: `file:////${RNFS.DocumentDirectoryPath}` }}
+            source={{ uri: `file:////${RNFS.DocumentDirectoryPath}/quill.html`, baseUrl: `file:////${RNFS.DocumentDirectoryPath}` }}
             style={this.webViewStyle}
             allowFileAccess={true}
             originWhitelist={['*']}
@@ -95,7 +96,7 @@ export class Quill extends React.Component<IProps, IState> {
     if (!!this.props.webviewRef) this.props.webviewRef(webView);
   };
 
-  private async loadResources(): Promise<void> {
+  public async loadResources(): Promise<void> {
     const scriptRequest = this.ResourceProvider.getQuillScript();
     const hightlightJSScriptRequest = this.ResourceProvider.getHightlightJSScript();
     const styleSheetRequest = this.ResourceProvider.getQuillStyleSheet(this.ThemeProvider);
@@ -117,12 +118,15 @@ export class Quill extends React.Component<IProps, IState> {
       injectedScript + ';' + script + ';' + blotsScriptString + ';' + formatsScriptString; //和主代码字串拼接起来
 
     // console.log("生成的HTML是：：", generateWebViewIndex({ script, styleSheet }, this.props.content, options));
-    this.setState({
-      html: generateWebViewIndex(
+    let html = generateWebViewIndex(
         { script: finalscript, styleSheet, editorStyle: this.props.editorStyle, hljs, hljsCSS },
         this.props.content,
         JSON.stringify(options)
-      ),
+      );
+    await RNFS.writeFile(RNFS.DocumentDirectoryPath + '/quill.html', html);
+    console.log("写入html成功");
+    this.setState({
+      htmlReady:  true,
     });
   }
 

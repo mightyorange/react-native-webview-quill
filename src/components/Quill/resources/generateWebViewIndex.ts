@@ -458,6 +458,7 @@ export function generateWebViewIndex (
           window.reportError(msg,url,l,c,error)
         }
         </script>
+        <h1>测试中文</h1>
       </body>
     </html>
   `
